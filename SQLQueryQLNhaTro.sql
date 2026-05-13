@@ -16,7 +16,7 @@ CREATE TABLE ChuTro (
     MaChuTro VARCHAR(12) PRIMARY KEY,
     HoTen NVARCHAR(100),
     GioiTinh NVARCHAR(10),
-    NgaySinh DATE, -- Đã chuyển sang DATE
+    NgaySinh DATE,
     DiaChi NVARCHAR(255),
     SDT VARCHAR(15)
 );
@@ -26,7 +26,7 @@ CREATE TABLE KhachHang (
     MaKhachHang VARCHAR(12) PRIMARY KEY,
     HoTen NVARCHAR(100),
     GioiTinh NVARCHAR(10),
-    NgaySinh DATE, -- Đã chuyển sang DATE
+    NgaySinh DATE,
     SDT VARCHAR(15),
     QueQuan NVARCHAR(100),
     NgheNghiep NVARCHAR(100)
@@ -55,36 +55,37 @@ CREATE TABLE PhongTro (
 
 -- 7. Bảng Thuê Phòng
 CREATE TABLE ThuePhong (
+    MaHopDong INT IDENTITY(1,1) PRIMARY KEY, 
     MaPhong VARCHAR(10),
     MaKhachHang VARCHAR(12),
     TienDatCoc FLOAT,
-    NgayBatDau DATE, -- Đã chuyển sang DATE
-    NgayKetThuc DATE, -- Đã chuyển sang DATE
-    PRIMARY KEY (MaPhong, MaKhachHang),
+    NgayBatDau DATE,
+    NgayKetThuc DATE,
+    TrangThai NVARCHAR(20), 
     FOREIGN KEY (MaPhong) REFERENCES PhongTro(MaPhong),
     FOREIGN KEY (MaKhachHang) REFERENCES KhachHang(MaKhachHang)
 );
 
--- 8. Bảng Hóa Đơn
+-- 8. Bảng Hóa Đơn (Đã loại bỏ TongTien)
 CREATE TABLE HoaDon (
     MaHD VARCHAR(10) PRIMARY KEY,
-    MaPhong VARCHAR(10),
+    MaHopDong INT, 
     TienPhong FLOAT,
-    TienDien FLOAT,
-    TienNuoc FLOAT,
+    ChiSoDienCu INT,
+    ChiSoDienMoi INT,
+    ChiSoNuocCu INT,
+    ChiSoNuocMoi INT,
     TienDV FLOAT,
-    TongTien FLOAT,
-    NgayLap DATE, -- Đã chuyển sang DATE
+    NgayLap DATE,
     TrangThai NVARCHAR(20),
-    FOREIGN KEY (MaPhong) REFERENCES PhongTro(MaPhong)
+    FOREIGN KEY (MaHopDong) REFERENCES ThuePhong(MaHopDong)
 );
 GO
 
 -- ---------------------------------------------------------
--- CHÈN DỮ LIỆU MẪU (ĐỊNH DẠNG CHUẨN YYYY-MM-DD)
+-- CHÈN DỮ LIỆU MẪU
 -- ---------------------------------------------------------
 
--- Chủ trọ & Khách hàng
 INSERT INTO ChuTro VALUES 
 ('1082946357', N'Nguyen Van A', N'Nam', '1980-04-01', N'08 Ha Van Tinh, phuong Hoa Khanh, Tp.Da Nang', '0383145674'),
 ('201564789321', N'Lê Thị Lan', N'Nữ', '1975-05-15', N'45 Ngô Quyền, Sơn Trà, Đà Nẵng', '0905123456'),
@@ -99,7 +100,6 @@ INSERT INTO KhachHang VALUES
 ('567890123456', N'Nguyen Phuoc Thinh', N'Nam', '2002-02-22', '0967890123', N'Quang Tri', N'ky su'),
 ('789012345678', N'Nguyen Cong Phuong', N'Nam', '1998-01-21', '0945678901', N'Nghe An', N'giao vien');
 
--- Nhà trọ & Phòng trọ
 INSERT INTO NhaTro VALUES  
 ('A01', N'Nha tro DMC', N'so 08,Ha Van Tinh,Hoa Khanh Nam,Lien Chieu,Da Nang', '1082946357'),
 ('A02', N'Nha tro Sinh Vien', N'so 14,Duong Dinh Nghe,An Hai Bac,Son Tra,Da Nang', '1082946357'),
@@ -116,24 +116,22 @@ INSERT INTO PhongTro VALUES
 ('C01001', 'C01', 1500000, 15, N'DaThue', 'Small', 'Coban'),
 ('C01002', 'C01', 1500000, 15, N'DaThue', 'Small', 'Coban');
 
--- Thuê phòng
-INSERT INTO ThuePhong VALUES  
-('A01001', '012345678901', 2000000, '2025-07-05', '2025-12-05'),
-('A01002', '123456789012', 2500000, '2025-07-10', '2025-12-10'),
-('A01003', '111111111111', 2000000, '2025-12-24', '2026-02-24'),
-('B01001', '345678901234', 3000000, '2026-01-01', '2027-01-01'),
-('C01001', '567890123456', 1500000, '2026-02-15', '2026-08-15'),
-('C01002', '789012345678', 1500000, '2026-03-01', '2027-03-01');
+INSERT INTO ThuePhong (MaPhong, MaKhachHang, TienDatCoc, NgayBatDau, NgayKetThuc, TrangThai) VALUES  
+('A01001', '012345678901', 2000000, '2025-07-05', '2025-12-05', N'Active'),
+('A01002', '123456789012', 2500000, '2025-07-10', '2025-12-10', N'Active'),
+('A01003', '111111111111', 2000000, '2025-12-24', '2026-02-24', N'Active'),
+('B01001', '345678901234', 3000000, '2026-01-01', '2027-01-01', N'Active'),
+('C01001', '567890123456', 1500000, '2026-02-15', '2026-08-15', N'Active'),
+('C01002', '789012345678', 1500000, '2026-03-01', '2027-03-01', N'Active');
 
--- Hóa đơn
+-- Chèn Hóa đơn không có TongTien
 INSERT INTO HoaDon VALUES  
-('HD101', 'A01001', 2000000, 180000, 30000, 15000, 2225000, '2025-10-01', N'DaNop'),
-('HD102', 'A01001', 2000000, 170000, 30000, 25000, 2225000, '2025-11-01', N'ChuaNop'),
-('HD201', 'B01001', 3000000, 250000, 50000, 30000, 3330000, '2026-02-01', N'DaNop'),
-('HD202', 'C01001', 1500000, 120000, 40000, 10000, 1670000, '2026-03-01', N'ChuaNop'),
-('HD203', 'C01002', 1500000, 100000, 40000, 10000, 1650000, '2026-04-01', N'ChuaNop');
+('HD101', 1, 2000000, 100, 150, 10, 15, 15000, '2025-10-01', N'DaNop'),
+('HD102', 1, 2000000, 150, 200, 15, 20, 25000, '2025-11-01', N'ChuaNop'),
+('HD201', 4, 3000000, 200, 280, 20, 30, 30000, '2026-02-01', N'DaNop'),
+('HD202', 5, 1500000, 100, 140, 10, 18, 10000, '2026-03-01', N'ChuaNop'),
+('HD203', 6, 1500000, 120, 155, 15, 22, 10000, '2026-04-01', N'ChuaNop');
 
--- Tài khoản
 INSERT INTO TaiKhoan VALUES 
 ('admin', '123', 1), 
 ('guest1', '123', 0), 
