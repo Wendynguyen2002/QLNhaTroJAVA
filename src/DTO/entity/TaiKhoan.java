@@ -1,5 +1,6 @@
 package DTO.entity;
 
+
 public class TaiKhoan {
 
     private String username;
@@ -10,7 +11,7 @@ public class TaiKhoan {
     public TaiKhoan() {}
 
     public TaiKhoan(String username, String password, int role, String userId) {
-        this.username = username;
+        this.username = username; // unique
         this.password = password;
         this.role = role;
         this.userId = userId;
