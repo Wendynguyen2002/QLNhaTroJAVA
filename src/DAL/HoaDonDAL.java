@@ -1,73 +1,97 @@
 package DAL;
 
 import DTO.entity.HoaDon;
-import java.sql.*;
-import java.util.ArrayList;
+import DTO.enums.TrangThaiHoaDon;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 
 public class HoaDonDAL {
 
-    private Connection conn;
+    private DBHelper db = DBHelper.getInstance();
 
-    public HoaDonDAL() {
-        conn = DBConnection.getConnection();
-    }
-
-    // ========================
-    // 1. Lấy tất cả / By ID / By FK
-    // ========================
-
+    // 1. GET ALL
     public List<HoaDon> getAll() {
-        return new ArrayList<>();
+        return db.query("SELECT * FROM HoaDon", this::map);
     }
 
-    public HoaDon getById(String maHD) {
-    	
-    	// Querry.....??
-        return null;
+    // 2. GET BY ID
+    public HoaDon getById(String maHoaDon) {
+        List<HoaDon> list = db.query("SELECT * FROM HoaDon WHERE MaHD=?", this::map, maHoaDon);
+        return list.isEmpty() ? null : list.get(0);
     }
 
-    public List<HoaDon> getByMaPhong(String maPhong) {
-    	
-    	// Querry.....??
-        return new ArrayList<>();
+    // 3. EXISTS
+    public boolean checkTonTai(String maHoaDon) {
+        return !db.query("SELECT MaHD FROM HoaDon WHERE MaHD=?", this::map, maHoaDon).isEmpty();
     }
 
-    // ========================
-    // 2. Thêm
-    // ========================
+    // 4. GET BY MA HOP DONG
+    public List<HoaDon> getByMaHopDong(int maHopDong) {
+        return db.query("SELECT * FROM HoaDon WHERE MaHopDong=?", this::map, maHopDong);
+    }
 
+    // 5. INSERT
     public boolean insert(HoaDon hd) {
-    	// Querry.....???
-        return false;
+        return db.update(
+                "INSERT INTO HoaDon(MaHD,MaHopDong,TienPhong,ChiSoDienCu,ChiSoDienMoi,ChiSoNuocCu,ChiSoNuocMoi,TienDV,NgayLap,TrangThai) " +
+                "VALUES(?,?,?,?,?,?,?,?,?,?)",
+                hd.getMaHoaDon(),
+                hd.getMaHopDong(),
+                hd.getTienPhong(),
+                hd.getChiSoDienCu(),
+                hd.getChiSoDienMoi(),
+                hd.getChiSoNuocCu(),
+                hd.getChiSoNuocMoi(),
+                hd.getTienDV(),
+                hd.getNgayLap(),
+                hd.getTrangThai().name()
+        ) > 0;
     }
 
-    // ========================
-    // 3. Update
-    // ========================
-
+    // 6. UPDATE
     public boolean update(HoaDon hd) {
-    	// Querry.....??
-        return false;
+        return db.update(
+                "UPDATE HoaDon SET MaHopDong=?,TienPhong=?,ChiSoDienCu=?,ChiSoDienMoi=?,ChiSoNuocCu=?,ChiSoNuocMoi=?,TienDV=?,NgayLap=?,TrangThai=? " +
+                "WHERE MaHD=?",
+                hd.getMaHopDong(),
+                hd.getTienPhong(),
+                hd.getChiSoDienCu(),
+                hd.getChiSoDienMoi(),
+                hd.getChiSoNuocCu(),
+                hd.getChiSoNuocMoi(),
+                hd.getTienDV(),
+                hd.getNgayLap(),
+                hd.getTrangThai().name(),
+                hd.getMaHoaDon()
+        ) > 0;
     }
 
-    // ========================
-    // 4. Xoá byID / Xoá by FK
-    // ========================
-
-    public boolean delete(String maHD) {
-        return false;
+    // 7. DELETE
+    public boolean delete(String maHoaDon) {
+        return db.update("DELETE FROM HoaDon WHERE MaHD=?", maHoaDon) > 0;
     }
 
-    public boolean deleteByMaPhong(String maPhong) {
-        return false;
+    // 8. DELETE BY MA HOP DONG
+    public boolean deleteByMaHopDong(int maHopDong) {
+        return db.update("DELETE FROM HoaDon WHERE MaHopDong=?", maHopDong) > 0;
     }
 
-    // ========================
-    // 5. Check tồn tại
-    // ========================
-
-    public boolean exists(String maHD) {
-        return false;
+    // 9. MAPPER
+    private HoaDon map(ResultSet rs) throws SQLException {
+        HoaDon hd = new HoaDon();
+        hd.setMaHoaDon(rs.getString("MaHD"));
+        hd.setMaHopDong(rs.getInt("MaHopDong"));
+        hd.setTienPhong(rs.getDouble("TienPhong"));
+        hd.setChiSoDienCu(rs.getInt("ChiSoDienCu"));
+        hd.setChiSoDienMoi(rs.getInt("ChiSoDienMoi"));
+        hd.setChiSoNuocCu(rs.getInt("ChiSoNuocCu"));
+        hd.setChiSoNuocMoi(rs.getInt("ChiSoNuocMoi"));
+        hd.setTienDV(rs.getDouble("TienDV"));
+        hd.setNgayLap(rs.getDate("NgayLap"));
+        String tt = rs.getString("TrangThai");
+        hd.setTrangThai("DaNop".equals(tt) ? TrangThaiHoaDon.DaNop : TrangThaiHoaDon.ChuaNop);
+        return hd;
     }
 }
