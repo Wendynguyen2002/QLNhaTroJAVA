@@ -31,4 +31,24 @@ public class DBConnection {
 
         return conn;
     }
+    
+    public static void closeConnection() {
+
+        try {
+
+            // Nếu connection tồn tại và chưa bị đóng
+            if (conn != null && !conn.isClosed()) {
+
+                conn.close();
+
+                System.out.println(
+                    "Da dong connection"
+                );
+            }
+
+        } catch (SQLException e) {
+
+            e.printStackTrace();
+        }
+    }
 }
